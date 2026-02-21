@@ -20,34 +20,60 @@
   const DESIGN_H = 640;
 
   const COLORS = {
-    pitch: '#2d8c2d',
-    pitchLight: '#3aa83a',
+    pitch: '#2a8828',
+    pitchLight: '#38a838',
+    pitchDark: '#1e7020',
     white: '#f0f0f0',
-    goalPost: '#e0e0e0',
-    net: '#a0a0a0',
+    goalPost: '#d8d8d8',
+    goalPostHL: '#f8f8f8',
+    goalPostSH: '#909090',
+    net: '#b0b0b0',
+    netShadow: '#606060',
     ball: '#f8f8f8',
     ballShadow: '#1a4c1a',
-    kickerShirt: '#2040c0',
-    kickerShorts: '#f0f0f0',
-    kickerSkin: '#e8b878',
+    ballPentagon: '#505050',
+    kickerShirt: '#e8c820',
+    kickerShirtDark: '#b8a018',
+    kickerShorts: '#3060d0',
+    kickerShortsDark: '#2048a0',
+    kickerSkin: '#d8a060',
+    kickerSkinDark: '#b88040',
     kickerHair: '#402010',
-    kickerShoes: '#101010',
-    gkShirt: '#e8c820',
+    kickerHairHL: '#603820',
+    kickerShoes: '#d06000',
+    kickerShoesDark: '#903800',
+    kickerSocks: '#e8c820',
+    spriteOutline: '#181018',
+    shirtNumber: '#d03020',
+    gkShirt: '#d03020',
+    gkShirtDark: '#a02018',
     gkShorts: '#101010',
+    gkShortsDark: '#282828',
     gkGloves: '#e04040',
-    gkSkin: '#e8b878',
+    gkGlovesDark: '#b03030',
+    gkSkin: '#d8a060',
+    gkSkinDark: '#b88040',
     crowd1: '#c83030',
     crowd2: '#3030c8',
     crowd3: '#f8f8f8',
     crowd4: '#e8c820',
     crowd5: '#40a040',
     crowd6: '#f88830',
+    crowd7: '#d06898',
+    crowd8: '#50b8c8',
     sky: '#3060a8',
-    scoreBg: '#181818',
+    skyLight: '#5888c8',
+    skyTop: '#1840a0',
+    scoreBg: '#101018',
+    scoreBgLight: '#202030',
     scoreText: '#f0f0f0',
     goalText: '#40e840',
     saveText: '#e84040',
     missText: '#e8e840',
+    adBoard1: '#d03030',
+    adBoard2: '#2040a0',
+    adBoard3: '#f0f0f0',
+    adBoard4: '#e8c820',
   };
 
   const SWIPE_MIN_DIST = 30;
@@ -208,6 +234,32 @@
   function drawTextCentered(text, y, ps, color) {
     const w = measureText(text, ps);
     drawText(text, (DESIGN_W - w) / 2, y, ps, color);
+  }
+
+  function drawTextShadow(text, x, y, ps, color, shadowColor) {
+    const sc = shadowColor || '#000000';
+    drawText(text, x + 1, y + 1, ps, sc);
+    drawText(text, x, y, ps, color);
+  }
+
+  function drawTextShadowCentered(text, y, ps, color, shadowColor) {
+    const w = measureText(text, ps);
+    const x = (DESIGN_W - w) / 2;
+    drawTextShadow(text, x, y, ps, color, shadowColor);
+  }
+
+  function drawTextOutlined(text, x, y, ps, color) {
+    // Draw in 8 offsets for thick outline
+    const offsets = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+    for (const [ox, oy] of offsets) {
+      drawText(text, x + ox, y + oy, ps, '#000000');
+    }
+    drawText(text, x, y, ps, color);
+  }
+
+  function drawTextOutlinedCentered(text, y, ps, color) {
+    const w = measureText(text, ps);
+    drawTextOutlined(text, (DESIGN_W - w) / 2, y, ps, color);
   }
 
   // ============================================================
@@ -445,224 +497,322 @@
   // ============================================================
   // SECTION 5: SPRITE DEFINITIONS
   // ============================================================
-  // Palette: .=transparent B=blue W=white S=skin H=hair K=black Y=yellow R=red G=gkskin D=dark
+  // Expanded ISS Deluxe palette
   const SP = {
     '.': null,
-    'B': COLORS.kickerShirt,
-    'W': COLORS.kickerShorts,
-    'S': COLORS.kickerSkin,
-    'H': COLORS.kickerHair,
-    'K': COLORS.kickerShoes,
-    'Y': COLORS.gkShirt,
-    'R': COLORS.gkGloves,
-    'G': COLORS.gkSkin,
-    'D': COLORS.gkShorts,
+    'O': COLORS.spriteOutline,
+    'B': COLORS.kickerShirt,     'b': COLORS.kickerShirtDark,
+    'W': COLORS.kickerShorts,    'w': COLORS.kickerShortsDark,
+    'S': COLORS.kickerSkin,      's': COLORS.kickerSkinDark,
+    'H': COLORS.kickerHair,      'h': COLORS.kickerHairHL,
+    'K': COLORS.kickerShoes,     'k': COLORS.kickerShoesDark,
+    'N': COLORS.shirtNumber,     'C': COLORS.kickerSocks,
+    'Y': COLORS.gkShirt,         'y': COLORS.gkShirtDark,
+    'R': COLORS.gkGloves,        'r': COLORS.gkGlovesDark,
+    'G': COLORS.gkSkin,          'g': COLORS.gkSkinDark,
+    'D': COLORS.gkShorts,        'd': COLORS.gkShortsDark,
   };
 
-  // Kicker frames (10 wide x 14 tall)
+  // Kicker frames (16 wide x 22 tall) — ISS Deluxe style (Brazil #10)
   const KICKER_STAND = [
-    '...HHHH...',
-    '..HSSSSH..',
-    '..HSSSSH..',
-    '...SSSS...',
-    '..BBBBBB..',
-    '.BBBBBBBB.',
-    '..BBBBBB..',
-    '..BB..BB..',
-    '..WW..WW..',
-    '..WW..WW..',
-    '..SS..SS..',
-    '..SS..SS..',
-    '..KK..KK..',
-    '..KK..KK..',
+    '......OHHHO.....',
+    '.....OHhHhHO....',
+    '.....OSSSsSO....',
+    '.....OsSSSsO....',
+    '......OSSO......',
+    '.....OBBBNBO....',
+    '....OBBBNBBbO...',
+    '....OBbBNBbBO...',
+    '....OBBbBbbBO...',
+    '.....OBBBbBO....',
+    '.....OWWOWWO....',
+    '.....OWWOOWO....',
+    '.....OwwOwwO....',
+    '.....OSSOOSO....',
+    '.....OssOOssO...',
+    '.....OSSO.OSO...',
+    '.....OCCO.OCO...',
+    '.....OCCO.OCO...',
+    '.....OKKO.OKO...',
+    '....OKKkO.OKkO..',
+    '....OKKkO.OKkO..',
+    '....OOOOO.OOOOO.',
   ];
 
   const KICKER_RUN1 = [
-    '...HHHH...',
-    '..HSSSSH..',
-    '..HSSSSH..',
-    '...SSSS...',
-    '..BBBBBB..',
-    '.BBBBBBBB.',
-    '..BBBBBB..',
-    '..BB..BB..',
-    '..WW...WW.',
-    '..WW....WW',
-    '..SS..SS..',
-    '.SS....SS.',
-    '.KK....KK.',
-    'KK......KK',
+    '......OHHHO.....',
+    '.....OHhHhHO....',
+    '.....OSSSsSO....',
+    '.....OsSSSsO....',
+    '......OSSO......',
+    '.....OBBBNBO....',
+    '....OBBBNBBbO...',
+    '....OBbBNBbBO...',
+    '....OBBbBbbBO...',
+    '.....OBBBbBO....',
+    '.....OWWOWWO....',
+    '....OwwO..OWO...',
+    '...OSSO....OwO..',
+    '..OssO.....OSSO.',
+    '..OSSO......OssO',
+    '..OCCO......OCCO',
+    '.OKKO........OKO',
+    'OKKkO.......OKkO',
+    'OKKkO.......OKkO',
+    'OOOOO.......OOOO',
+    '................',
+    '................',
   ];
 
   const KICKER_RUN2 = [
-    '...HHHH...',
-    '..HSSSSH..',
-    '..HSSSSH..',
-    '...SSSS...',
-    '..BBBBBB..',
-    '.BBBBBBBB.',
-    '..BBBBBB..',
-    '..BB..BB..',
-    '.WW..WW...',
-    'WW....WW..',
-    '..SS..SS..',
-    '.SS....SS.',
-    '.KK....KK.',
-    'KK......KK',
+    '......OHHHO.....',
+    '.....OHhHhHO....',
+    '.....OSSSsSO....',
+    '.....OsSSSsO....',
+    '......OSSO......',
+    '.....OBBBNBO....',
+    '....OBBBNBBbO...',
+    '....OBbBNBbBO...',
+    '....OBBbBbbBO...',
+    '.....OBBBbBO....',
+    '.....OWWOWWO....',
+    '....OWO..OwwO...',
+    '...OwO....OSSO..',
+    '..OSSO.....OssO.',
+    '.OssO......OSSO.',
+    '.OCCO......OCCO.',
+    '..OKO......OKKO.',
+    '.OKkO.....OKKkO.',
+    '.OKkO.....OKKkO.',
+    '.OOOO.....OOOOO.',
+    '................',
+    '................',
   ];
 
   const KICKER_WINDUP = [
-    '...HHHH...',
-    '..HSSSSH..',
-    '..HSSSSH..',
-    '...SSSS...',
-    '.BBBBBBB..',
-    'BBBBBBBB..',
-    '.BBBBBBB..',
-    '..BB..BB..',
-    '..WW..WW..',
-    '..WW...WW.',
-    '..SS....SS',
-    '..SS....SS',
-    '..KK...KK.',
-    '..KK..KK..',
+    '......OHHHO.....',
+    '.....OHhHhHO....',
+    '.....OSSSsSO....',
+    '.....OsSSSsO....',
+    '......OSSO......',
+    '....OBBBNBBO....',
+    '...OBBBNBBbBO...',
+    '...OBbBNBbBBO...',
+    '....OBBbBbbO....',
+    '.....OBBBbBO....',
+    '.....OWWOWWO....',
+    '.....OWWOWWO....',
+    '.....OwwOOwwO...',
+    '.....OSSO..OsO..',
+    '.....OssO...OsO.',
+    '.....OSSO....OSO',
+    '.....OCCO....OCO',
+    '.....OKKO....OKO',
+    '....OKKkO...OKkO',
+    '....OKKkO..OKkO.',
+    '....OOOOO..OOOO.',
+    '................',
   ];
 
   const KICKER_KICK = [
-    '...HHHH...',
-    '..HSSSSH..',
-    '..HSSSSH..',
-    '...SSSS...',
-    '..BBBBBBB.',
-    '..BBBBBBBB',
-    '..BBBBBBB.',
-    '..BB..BB..',
-    '..WW..WW..',
-    '..WW.WW...',
-    '..SS.SS...',
-    '..SSSS....',
-    '..KKKK....',
-    '..KK......',
+    '......OHHHO.....',
+    '.....OHhHhHO....',
+    '.....OSSSsSO....',
+    '.....OsSSSsO....',
+    '......OSSO......',
+    '.....OBBBNBBO...',
+    '....OBBBNBBbBO..',
+    '....OBbBNBbBBO..',
+    '.....OBBbBbbO...',
+    '.....OBBBbBO....',
+    '.....OWWOWWO....',
+    '.....OWWOWWO....',
+    '....OwwOOwwO....',
+    '....OssOOssO....',
+    '...OSSOOSSO.....',
+    '...OCCOOCCO.....',
+    '...OKKOOKKO.....',
+    '..OKKkOKKkO.....',
+    '..OKKkKKkO......',
+    '..OOOOOOO.......',
+    '................',
+    '................',
   ];
 
-  // Goalkeeper frames (12 wide x 14 tall)
+  // Goalkeeper frames (18 wide x 22 tall) — ISS Deluxe style (red kit)
   const GK_STAND = [
-    '....HHHH....',
-    '...HGGGGH...',
-    '...HGGGGH...',
-    '....GGGG....',
-    '..YYYYYYYY..',
-    '.YYYYYYYYYY.',
-    '..YYYYYYYY..',
-    '..YY....YY..',
-    '..DD....DD..',
-    '..DD....DD..',
-    '..GG....GG..',
-    '..GG....GG..',
-    '..KK....KK..',
-    '..KK....KK..',
+    '........OHHHO.........',
+    '.......OHGGgHO........',
+    '.......OGGGGgO........',
+    '.......OgGGGgO........',
+    '........OGGO..........',
+    '.......OYYYYYY........',
+    '......OYYYYYYyO.......',
+    '......OYyYYYyYO.......',
+    '......OYYyYyyYO.......',
+    '.......OYYYyYO........',
+    '.......ODDODDO........',
+    '.......ODDOdDO........',
+    '.......OddOddO........',
+    '.......OGGOOGO........',
+    '.......OggOOggO.......',
+    '.......OGGO.OGO.......',
+    '.......OKKO.OKO.......',
+    '......OKKkO.OKkO......',
+    '......OKKkO.OKkO......',
+    '......OOOOO.OOOOO.....',
+    '..................',
+    '..................',
   ];
 
   const GK_READY = [
-    '....HHHH....',
-    '...HGGGGH...',
-    '...HGGGGH...',
-    '....GGGG....',
-    'RRYYYYYYYY..',
-    'RYYYYYYYYYRR',
-    '..YYYYYYYY..',
-    '..YY....YY..',
-    '.DD......DD.',
-    '.DD......DD.',
-    '..GG....GG..',
-    '..GG....GG..',
-    '.KK......KK.',
-    '.KK......KK.',
+    '........OHHHO.........',
+    '.......OHGGgHO........',
+    '.......OGGGGgO........',
+    '.......OgGGGgO........',
+    '........OGGO..........',
+    '.......OYYYYYY........',
+    '.....ROYYYYYYYOR......',
+    '.....ROYyYYYyYOR......',
+    '......OYYyYyyYO.......',
+    '.......OYYYyYO........',
+    '.......ODDODDO........',
+    '......OdDO..ODdO......',
+    '......ODdO..OdDO......',
+    '.......OGO..OGO.......',
+    '......OggO..OggO......',
+    '......OGGO..OGGO......',
+    '......OKKO..OKKO......',
+    '.....OKKkO..OKkO.....',
+    '.....OKKkO..OKkO.....',
+    '.....OOOOO..OOOOO....',
+    '..................',
+    '..................',
   ];
 
   const GK_DIVE_L1 = [
-    '....HHHH....',
-    '...HGGGGH...',
-    '...HGGGGH...',
-    '....GGGG....',
-    'RRYYYYYYYY..',
-    'RYYYYYYYYYYY',
-    '.YYYYYYYYYY.',
-    '..YY...YY...',
-    '.DD...DD....',
-    '.DD..DD.....',
-    '..GGGG......',
-    '..GGGG......',
-    '.KKKK.......',
-    'KKKK........',
+    '.......OHHHO..........',
+    '......OHGGgHO.........',
+    '......OGGGGgO.........',
+    '......OgGGGgO.........',
+    '.......OGGO...........',
+    '.....ROYYYYYY.........',
+    '....ROYYYYYYyOR.......',
+    '....ROYyYYYyYO........',
+    '.....OYYyYyyYO........',
+    '......OYYYyYO.........',
+    '.....ODDODDO..........',
+    '....ODdOODdO..........',
+    '...OdDOOdDO...........',
+    '...OGGOOGO............',
+    '..OggOOggO............',
+    '..OGGOOGO.............',
+    '.OKKOOKO..............',
+    'OKKkOKkO..............',
+    'OKKkOKkO..............',
+    'OOOOOOO...............',
+    '..................',
+    '..................',
   ];
 
   const GK_DIVE_L2 = [
-    '............',
-    '............',
-    '............',
-    '..HHHH......',
-    '.HGGGGH.....',
-    'RRGGGGH.....',
-    'RRGGGG......',
-    'YYYYYYYY....',
-    'YYYYYYYYYY..',
-    'YYYYYYYY....',
-    '..DDDDDD....',
-    '...GGGGGG...',
-    '....KKKKKK..',
-    '.....KKKKKK.',
+    '..................',
+    '..................',
+    '..................',
+    '..................',
+    '....OHHHO.........',
+    '...OHGGgHO........',
+    '..ROGGGGgO........',
+    '..ROgGGGgO........',
+    '....OGGO..........',
+    '.OYYYYYYyO........',
+    'OYYYYYYYYyO.......',
+    'OYyYYYYyYYO.......',
+    '..OYYyYyyYO.......',
+    '...ODDDDDO........',
+    '....OGGGGG........',
+    '.....OggggGO......',
+    '......OKKKKO......',
+    '.......OKKkKO.....',
+    '........OKKkO.....',
+    '.........OOOO.....',
+    '..................',
+    '..................',
   ];
 
   const GK_DIVE_R1 = [
-    '....HHHH....',
-    '...HGGGGH...',
-    '...HGGGGH...',
-    '....GGGG....',
-    '..YYYYYYYRR.',
-    'YYYYYYYYYRR.',
-    '.YYYYYYYYYY.',
-    '...YY...YY..',
-    '....DD...DD.',
-    '.....DD..DD.',
-    '......GGGG..',
-    '......GGGG..',
-    '.......KKKK.',
-    '........KKKK',
+    '..........OHHHO.......',
+    '.........OHGGgHO......',
+    '.........OGGGGgO......',
+    '.........OgGGGgO......',
+    '..........OGGO........',
+    '.........YYYYYYOR.....',
+    '.......ROYYYYYYyOR....',
+    '........OYyYYYyYOR....',
+    '........OYYyYyyYO.....',
+    '.........OYYYyYO......',
+    '..........ODDODDO.....',
+    '..........ODdOODdO....',
+    '...........OdDOOdDO...',
+    '............OGGOOGO...',
+    '............OggOOggO..',
+    '.............OGGOOGO..',
+    '..............OKOOKKO.',
+    '..............OKkOKKkO',
+    '..............OKkOKKkO',
+    '...............OOOOOOO',
+    '..................',
+    '..................',
   ];
 
   const GK_DIVE_R2 = [
-    '............',
-    '............',
-    '............',
-    '......HHHH..',
-    '.....HGGGGH.',
-    '.....HGGGGRR',
-    '......GGGGRR',
-    '....YYYYYYYY',
-    '..YYYYYYYYYY',
-    '....YYYYYYYY',
-    '....DDDDDD..',
-    '...GGGGGG...',
-    '..KKKKKK....',
-    '.KKKKKK.....',
+    '..................',
+    '..................',
+    '..................',
+    '..................',
+    '.........OHHHO....',
+    '........OHGGgHO...',
+    '........OGGGGgOR..',
+    '........OgGGGgOR..',
+    '..........OGGO....',
+    '........OYYYYYYyO.',
+    '.......OYYYYYYYYyO',
+    '.......OYYyYYYyYyO',
+    '.......OYYyYyyYO..',
+    '........ODDDDDO...',
+    '........GGGGGGO...',
+    '......OGggggO.....',
+    '......OKKKKO......',
+    '.....OKkKKO.......',
+    '.....OKkKO........',
+    '.....OOOO.........',
+    '..................',
+    '..................',
   ];
 
   const GK_DIVE_C = [
-    '............',
-    '............',
-    '............',
-    '............',
-    '....HHHH....',
-    '...HGGGGH...',
-    '...HGGGGH...',
-    '....GGGG....',
-    'RRYYYYYYRR..',
-    'RYYYYYYYYY..',
-    '..YYYYYYYY..',
-    '..DDDDDDDD..',
-    '..GGGGGGGG..',
-    '..KKKKKKKK..',
+    '..................',
+    '..................',
+    '..................',
+    '..................',
+    '..................',
+    '........OHHHO.....',
+    '.......OHGGgHO....',
+    '.......OGGGGgO....',
+    '.......OgGGGgO....',
+    '........OGGO......',
+    '....ROYYYYYYyOR...',
+    '...ROYYYYYYYYyOR..',
+    '....OYyYYYyYYO....',
+    '....OYYyYyyYO.....',
+    '.....ODDDDDO......',
+    '.....OGGGGGO......',
+    '......OggggO......',
+    '......OKKKKO......',
+    '.......OOKKO......',
+    '.......OOOO.......',
+    '..................',
+    '..................',
   ];
 
   function drawSprite(spriteData, x, y, ps, flipH) {
@@ -683,17 +833,25 @@
   // ============================================================
   // SECTION 6: CROWD GENERATION
   // ============================================================
-  const crowdColors = [COLORS.crowd1, COLORS.crowd2, COLORS.crowd3, COLORS.crowd4, COLORS.crowd5, COLORS.crowd6];
+  const crowdColors = [COLORS.crowd1, COLORS.crowd2, COLORS.crowd3, COLORS.crowd4, COLORS.crowd5, COLORS.crowd6, COLORS.crowd7, COLORS.crowd8];
+  const skinColors = ['#d8a060','#c89050','#a07040','#f0c898','#8b6030'];
+  const hairColors = ['#402010','#201008','#603820','#d8a050','#181010'];
   let crowdBuffer = [];
   let crowdAnimating = false;
   let crowdAnimTimer = 0;
 
   function generateCrowd() {
     crowdBuffer = [];
-    for (let y = 0; y < 22; y++) {
+    const rows = 6;
+    const cols = 60;
+    for (let r = 0; r < rows; r++) {
       const row = [];
-      for (let x = 0; x < 90; x++) {
-        row.push(crowdColors[Math.floor(Math.random() * crowdColors.length)]);
+      for (let c = 0; c < cols; c++) {
+        row.push({
+          shirt: crowdColors[Math.floor(Math.random() * crowdColors.length)],
+          skin: skinColors[Math.floor(Math.random() * skinColors.length)],
+          hair: hairColors[Math.floor(Math.random() * hairColors.length)],
+        });
       }
       crowdBuffer.push(row);
     }
@@ -705,17 +863,30 @@
   }
 
   function drawCrowd() {
-    const ps = 4;
-    const startY = 60;
+    const startY = 62;
+    const figW = 6; const figH = 14;
+    const rowH = figH + 1;
     for (let r = 0; r < crowdBuffer.length; r++) {
       const row = crowdBuffer[r];
       for (let c = 0; c < row.length; c++) {
-        ctx.fillStyle = row[c];
-        let yo = 0;
+        const fig = row[c];
+        const fx = c * figW;
+        let fy = startY + r * rowH;
         if (crowdAnimating && crowdAnimTimer > 0) {
-          yo = Math.sin((c + r + crowdAnimTimer) * 0.5) * 2;
+          fy += Math.sin((c + r * 3 + crowdAnimTimer) * 0.5) * 2;
         }
-        ctx.fillRect(c * ps, startY + r * ps + yo, ps, ps);
+        // hair/head
+        ctx.fillStyle = fig.hair;
+        ctx.fillRect(fx + 1, fy, 4, 2);
+        // face
+        ctx.fillStyle = fig.skin;
+        ctx.fillRect(fx + 1, fy + 2, 4, 3);
+        // shirt
+        ctx.fillStyle = fig.shirt;
+        ctx.fillRect(fx, fy + 5, 6, 6);
+        // shirt shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(fx, fy + 9, 6, 2);
       }
     }
     if (crowdAnimating) {
@@ -727,43 +898,138 @@
   // ============================================================
   // SECTION 7: SCENE RENDERING
   // ============================================================
+  let skyGradient = null;
+
   function drawSky() {
-    ctx.fillStyle = COLORS.sky;
+    // Gradient sky
+    if (!skyGradient) {
+      skyGradient = ctx.createLinearGradient(0, 0, 0, 150);
+      skyGradient.addColorStop(0, COLORS.skyTop);
+      skyGradient.addColorStop(0.7, COLORS.sky);
+      skyGradient.addColorStop(1, COLORS.skyLight);
+    }
+    ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, DESIGN_W, 150);
-    // stadium wall
-    ctx.fillStyle = '#484040';
+    // Clouds
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    const co = (titleAnimTimer * 0.02) % DESIGN_W;
+    ctx.beginPath(); ctx.ellipse((80 + co) % DESIGN_W, 25, 40, 10, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse((220 + co * 0.7) % DESIGN_W, 40, 30, 8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse((320 + co * 0.5) % DESIGN_W, 15, 25, 7, 0, 0, Math.PI*2); ctx.fill();
+
+    // Stadium structure
+    const wallGrd = ctx.createLinearGradient(0, 145, 0, 165);
+    wallGrd.addColorStop(0, '#585050'); wallGrd.addColorStop(1, '#383030');
+    ctx.fillStyle = wallGrd;
     ctx.fillRect(0, 145, DESIGN_W, 60);
+
+    // Roof overhang hint
+    ctx.fillStyle = '#282020';
+    ctx.fillRect(0, 56, DESIGN_W, 6);
+
+    // Advertising boards
+    const adY = 148; const adH = 12;
+    const boards = [
+      {x:0, w:90, c:COLORS.adBoard1},
+      {x:90, w:90, c:COLORS.adBoard2},
+      {x:180, w:90, c:COLORS.adBoard3},
+      {x:270, w:90, c:COLORS.adBoard4},
+    ];
+    for (const b of boards) {
+      ctx.fillStyle = b.c;
+      ctx.fillRect(b.x, adY, b.w, adH);
+      // Board border
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(b.x, adY, b.w, 1);
+      ctx.fillRect(b.x, adY + adH - 1, b.w, 1);
+    }
+    // Ad text hints (small pixel marks)
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    for (let i = 0; i < 12; i++) {
+      ctx.fillRect(15 + i * 30 + Math.floor(Math.random()*0.01), adY + 4, 18, 4);
+    }
   }
 
   function drawPitch() {
-    const stripeH = 30;
     const startY = GOAL_BOTTOM;
-    for (let i = 0; i < 16; i++) {
-      ctx.fillStyle = i % 2 === 0 ? COLORS.pitch : COLORS.pitchLight;
-      ctx.fillRect(0, startY + i * stripeH, DESIGN_W, stripeH);
+    const totalH = DESIGN_H - startY;
+    const numStripes = 14;
+    for (let i = 0; i < numStripes; i++) {
+      // Perspective: stripes get taller further from goal
+      const t0 = i / numStripes;
+      const t1 = (i + 1) / numStripes;
+      const y0 = startY + t0 * totalH;
+      const y1 = startY + t1 * totalH;
+      const h = y1 - y0;
+
+      // Gradient per stripe
+      const dark = i % 2 === 0;
+      const grd = ctx.createLinearGradient(0, y0, 0, y1);
+      if (dark) {
+        grd.addColorStop(0, '#2e8e2c'); grd.addColorStop(1, '#268024');
+      } else {
+        grd.addColorStop(0, '#3cac3a'); grd.addColorStop(1, '#32a030');
+      }
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, y0, DESIGN_W, h + 1);
     }
-    // penalty area lines (perspective trapezoid)
+
+    // Subtle grass texture (scattered dots)
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
+    for (let i = 0; i < 200; i++) {
+      const gx = (i * 73 + 17) % DESIGN_W;
+      const gy = startY + (i * 137 + 31) % (DESIGN_H - startY);
+      ctx.fillRect(gx, gy, 1, 1);
+    }
+
+    // Goal line
+    ctx.strokeStyle = COLORS.white;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(GOAL_LEFT - 15, GOAL_BOTTOM);
+    ctx.lineTo(GOAL_RIGHT + 15, GOAL_BOTTOM);
+    ctx.stroke();
+
+    // Penalty area (perspective trapezoid) with shadow
+    ctx.strokeStyle = 'rgba(0,40,0,0.25)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(71, GOAL_BOTTOM + 1); ctx.lineTo(291, GOAL_BOTTOM + 1);
+    ctx.lineTo(331, DESIGN_H); ctx.lineTo(31, DESIGN_H);
+    ctx.closePath(); ctx.stroke();
+
+    ctx.strokeStyle = COLORS.white;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(70, GOAL_BOTTOM); ctx.lineTo(290, GOAL_BOTTOM);
+    ctx.lineTo(330, DESIGN_H); ctx.lineTo(30, DESIGN_H);
+    ctx.closePath(); ctx.stroke();
+
+    // 6 yard box
     ctx.strokeStyle = COLORS.white;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(70, GOAL_BOTTOM);
-    ctx.lineTo(290, GOAL_BOTTOM);
-    ctx.lineTo(330, DESIGN_H);
-    ctx.lineTo(30, DESIGN_H);
-    ctx.closePath();
-    ctx.stroke();
+    ctx.moveTo(95, GOAL_BOTTOM); ctx.lineTo(265, GOAL_BOTTOM);
+    ctx.lineTo(275, GOAL_BOTTOM + 80); ctx.lineTo(85, GOAL_BOTTOM + 80);
+    ctx.closePath(); ctx.stroke();
 
-    // penalty spot
+    // Penalty spot (cross)
     ctx.fillStyle = COLORS.white;
-    ctx.beginPath();
-    ctx.arc(GOAL_CENTER_X, PENALTY_SPOT_Y, 3, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(GOAL_CENTER_X - 4, PENALTY_SPOT_Y - 1, 8, 2);
+    ctx.fillRect(GOAL_CENTER_X - 1, PENALTY_SPOT_Y - 4, 2, 8);
 
-    // penalty arc (partial)
+    // Penalty arc
     ctx.strokeStyle = COLORS.white;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(GOAL_CENTER_X, PENALTY_SPOT_Y, 50, -Math.PI * 0.65, -Math.PI * 0.35);
+    ctx.stroke();
+
+    // Center circle hint at bottom
+    ctx.strokeStyle = 'rgba(240,240,240,0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(GOAL_CENTER_X, DESIGN_H + 80, 60, -Math.PI * 0.85, -Math.PI * 0.15);
     ctx.stroke();
   }
 
@@ -772,73 +1038,117 @@
     const gr = GOAL_RIGHT;
     const gt = GOAL_TOP;
     const gb = GOAL_BOTTOM;
-    const depth = 25;
+    const depth = 28;
 
-    // Net back
-    ctx.fillStyle = '#304830';
+    // Net back panel gradient
+    const netGrd = ctx.createLinearGradient(0, gt - depth, 0, gb);
+    netGrd.addColorStop(0, '#1a301a'); netGrd.addColorStop(1, '#304830');
+    ctx.fillStyle = netGrd;
     ctx.beginPath();
-    ctx.moveTo(gl + 10, gt - depth);
-    ctx.lineTo(gr - 10, gt - depth);
-    ctx.lineTo(gr, gb);
-    ctx.lineTo(gl, gb);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(gl + 12, gt - depth); ctx.lineTo(gr - 12, gt - depth);
+    ctx.lineTo(gr, gb); ctx.lineTo(gl, gb);
+    ctx.closePath(); ctx.fill();
 
-    // Net lines
-    ctx.strokeStyle = COLORS.net;
-    ctx.lineWidth = 0.8;
-    ctx.globalAlpha = 0.5;
+    // Side net panels (depth)
+    ctx.fillStyle = '#283828';
+    // Left side net
+    ctx.beginPath();
+    ctx.moveTo(gl, gb); ctx.lineTo(gl + 12, gt - depth);
+    ctx.lineTo(gl - 8, gt - depth + 5); ctx.lineTo(gl - GOAL_POST_W, gb);
+    ctx.closePath(); ctx.fill();
+    // Right side net
+    ctx.beginPath();
+    ctx.moveTo(gr, gb); ctx.lineTo(gr - 12, gt - depth);
+    ctx.lineTo(gr + 8, gt - depth + 5); ctx.lineTo(gr + GOAL_POST_W, gb);
+    ctx.closePath(); ctx.fill();
 
-    // Vertical net lines
-    for (let x = gl; x <= gr; x += 7) {
-      const progress = (x - gl) / (gr - gl);
-      const topX = gl + 10 + progress * ((gr - 10) - (gl + 10));
-      ctx.beginPath();
-      ctx.moveTo(x, gb);
-      ctx.lineTo(topX, gt - depth);
-      ctx.stroke();
+    // Net mesh — dense grid
+    ctx.lineWidth = 0.6;
+    ctx.globalAlpha = 0.4;
+    // Vertical lines
+    for (let x = gl; x <= gr; x += 5) {
+      const p = (x - gl) / (gr - gl);
+      const topX = gl + 12 + p * ((gr - 12) - (gl + 12));
+      ctx.strokeStyle = COLORS.netShadow;
+      ctx.beginPath(); ctx.moveTo(x, gb); ctx.lineTo(topX, gt - depth); ctx.stroke();
+      ctx.strokeStyle = COLORS.net;
+      ctx.beginPath(); ctx.moveTo(x - 0.5, gb); ctx.lineTo(topX - 0.5, gt - depth); ctx.stroke();
     }
-    // Horizontal net lines
-    for (let i = 0; i < 7; i++) {
-      const t = i / 6;
+    // Horizontal lines (with sag)
+    for (let i = 0; i < 10; i++) {
+      const t = i / 9;
       const y = gb - t * (gb - gt + depth);
-      const lx = gl + t * 10;
-      const rx = gr - t * 10;
-      ctx.beginPath();
-      ctx.moveTo(lx, y);
-      ctx.lineTo(rx, y);
-      ctx.stroke();
+      const lx = gl + t * 12;
+      const rx = gr - t * 12;
+      const sag = Math.sin(t * Math.PI) * 3;
+      ctx.strokeStyle = COLORS.netShadow;
+      ctx.beginPath(); ctx.moveTo(lx, y);
+      ctx.quadraticCurveTo((lx + rx) / 2, y + sag + 0.5, rx, y); ctx.stroke();
+      ctx.strokeStyle = COLORS.net;
+      ctx.beginPath(); ctx.moveTo(lx, y - 0.5);
+      ctx.quadraticCurveTo((lx + rx) / 2, y + sag - 0.5, rx, y - 0.5); ctx.stroke();
     }
     ctx.globalAlpha = 1;
 
-    // Net ripple effect
+    // Net ripple effect (enhanced)
     if (netRipple.active) {
-      ctx.strokeStyle = '#f0f0f0';
-      ctx.lineWidth = 1.5;
-      ctx.globalAlpha = 0.4 * (1 - netRipple.time / 40);
-      const r = netRipple.time * 3;
-      ctx.beginPath();
-      ctx.arc(netRipple.x, netRipple.impactY, r, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(netRipple.x, netRipple.impactY, r * 0.6, 0, Math.PI * 2);
-      ctx.stroke();
+      const alpha = 0.5 * (1 - netRipple.time / 40);
+      // Golden flash at impact
+      if (netRipple.time < 4) {
+        ctx.fillStyle = 'rgba(232,200,32,' + (0.4 - netRipple.time * 0.1) + ')';
+        ctx.beginPath(); ctx.arc(netRipple.x, netRipple.impactY, 8, 0, Math.PI * 2); ctx.fill();
+      }
+      for (let ring = 0; ring < 4; ring++) {
+        const delay = ring * 3;
+        const rt = netRipple.time - delay;
+        if (rt <= 0) continue;
+        const r = rt * 2.5;
+        ctx.strokeStyle = '#f0f0f0';
+        ctx.lineWidth = 1.5 - ring * 0.3;
+        ctx.globalAlpha = alpha * (1 - ring * 0.2);
+        ctx.beginPath(); ctx.arc(netRipple.x, netRipple.impactY, r, 0, Math.PI * 2); ctx.stroke();
+      }
       ctx.globalAlpha = 1;
     }
   }
 
   function drawGoalPosts() {
+    const pw = GOAL_POST_W + 2; // visual width slightly wider
+    const postH = GOAL_BOTTOM - GOAL_TOP;
+
+    // Post shadows on pitch
+    ctx.fillStyle = 'rgba(0,40,0,0.15)';
+    ctx.fillRect(GOAL_LEFT - pw/2 + 2, GOAL_BOTTOM, pw, 12);
+    ctx.fillRect(GOAL_RIGHT - pw/2 + 2, GOAL_BOTTOM, pw, 12);
+
+    // Left post (3 strips: highlight, body, shadow)
+    const lpx = GOAL_LEFT - pw/2 - 1;
+    ctx.fillStyle = COLORS.goalPostHL;
+    ctx.fillRect(lpx, GOAL_TOP, 2, postH);
     ctx.fillStyle = COLORS.goalPost;
-    // Left post
-    ctx.fillRect(GOAL_LEFT - GOAL_POST_W, GOAL_TOP, GOAL_POST_W, GOAL_BOTTOM - GOAL_TOP);
+    ctx.fillRect(lpx + 2, GOAL_TOP, pw - 4, postH);
+    ctx.fillStyle = COLORS.goalPostSH;
+    ctx.fillRect(lpx + pw - 2, GOAL_TOP, 2, postH);
+
     // Right post
-    ctx.fillRect(GOAL_RIGHT, GOAL_TOP, GOAL_POST_W, GOAL_BOTTOM - GOAL_TOP);
-    // Crossbar
-    ctx.fillRect(GOAL_LEFT - GOAL_POST_W, GOAL_TOP - 3, GOAL_RIGHT - GOAL_LEFT + GOAL_POST_W * 2, 5);
-    // Post shadows (inner)
-    ctx.fillStyle = '#b0b0b0';
-    ctx.fillRect(GOAL_LEFT, GOAL_TOP, 2, GOAL_BOTTOM - GOAL_TOP);
-    ctx.fillRect(GOAL_RIGHT - 2, GOAL_TOP, 2, GOAL_BOTTOM - GOAL_TOP);
+    const rpx = GOAL_RIGHT - pw/2 + 1;
+    ctx.fillStyle = COLORS.goalPostSH;
+    ctx.fillRect(rpx, GOAL_TOP, 2, postH);
+    ctx.fillStyle = COLORS.goalPost;
+    ctx.fillRect(rpx + 2, GOAL_TOP, pw - 4, postH);
+    ctx.fillStyle = COLORS.goalPostHL;
+    ctx.fillRect(rpx + pw - 2, GOAL_TOP, 2, postH);
+
+    // Crossbar (top highlight, body, bottom shadow)
+    const cbY = GOAL_TOP - 4;
+    const cbW = GOAL_RIGHT - GOAL_LEFT + pw + 2;
+    const cbX = GOAL_LEFT - pw/2 - 1;
+    ctx.fillStyle = COLORS.goalPostHL;
+    ctx.fillRect(cbX, cbY, cbW, 2);
+    ctx.fillStyle = COLORS.goalPost;
+    ctx.fillRect(cbX, cbY + 2, cbW, 3);
+    ctx.fillStyle = COLORS.goalPostSH;
+    ctx.fillRect(cbX, cbY + 5, cbW, 2);
   }
 
   // ============================================================
@@ -1275,15 +1585,27 @@
   // SECTION 12: PARTICLES & EFFECTS
   // ============================================================
   function spawnCelebration() {
-    for (let i = 0; i < 50; i++) {
+    const confettiColors = [
+      '#e8c820','#f0d840','#ffd700', // golds
+      '#40e840','#30c030',             // greens
+      '#f0f0f0','#d0d0d0',           // whites
+      '#e84040','#4040e8','#e88020', // accents
+    ];
+    for (let i = 0; i < 75; i++) {
+      const shape = Math.random() < 0.4 ? 'rect' : Math.random() < 0.7 ? 'square' : 'circle';
       particles.push({
-        x: GOAL_CENTER_X + (Math.random() - 0.5) * 160,
-        y: 140 + Math.random() * 60,
-        vx: (Math.random() - 0.5) * 5,
-        vy: -1 - Math.random() * 4,
-        color: ['#e84040','#4040e8','#e8e840','#40e840','#f8f8f8','#e88020'][Math.floor(Math.random() * 6)],
-        life: 50 + Math.random() * 50,
+        x: GOAL_CENTER_X + (Math.random() - 0.5) * 180,
+        y: 120 + Math.random() * 80,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -1.5 - Math.random() * 5,
+        color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+        life: 60 + Math.random() * 60,
         size: 2 + Math.floor(Math.random() * 3),
+        shape: shape,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.15,
+        w: shape === 'rect' ? 2 + Math.random() * 3 : 0,
+        h: shape === 'rect' ? 4 + Math.random() * 4 : 0,
       });
     }
   }
@@ -1294,6 +1616,8 @@
       p.x += p.vx;
       p.y += p.vy;
       p.vy += 0.08;
+      p.vx *= 0.995;
+      p.rotation += p.rotSpeed;
       p.life--;
       if (p.life <= 0) particles.splice(i, 1);
     }
@@ -1302,8 +1626,26 @@
   function drawParticles() {
     for (const p of particles) {
       ctx.fillStyle = p.color;
-      ctx.globalAlpha = Math.min(1, p.life / 15);
-      ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+      ctx.globalAlpha = Math.min(1, p.life / 18);
+      const px = Math.floor(p.x);
+      const py = Math.floor(p.y);
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(px, py, p.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.shape === 'rect') {
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(p.rotation);
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(p.rotation);
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      }
     }
     ctx.globalAlpha = 1;
   }
@@ -1650,14 +1992,26 @@
 
   function drawBallTrail() {
     if (ballTrail.length < 2) return;
+    const isCurve = ball.shotType === 'curve';
+    const isPanenka = ball.shotType === 'panenka';
     for (let i = 0; i < ballTrail.length; i++) {
       const t = ballTrail[i];
-      const size = 2 + (i / ballTrail.length) * 3;
-      ctx.fillStyle = ball.shotType === 'curve' ? '#60a0ff' : '#ffffff';
-      ctx.globalAlpha = t.alpha * 0.6;
+      const progress = i / ballTrail.length;
+      const r = 1.5 + progress * 3;
+      ctx.globalAlpha = t.alpha * 0.5;
+      // Mini-ball stamps
+      ctx.fillStyle = isCurve ? '#4080e0' : isPanenka ? '#d0a020' : '#d0d0d0';
       ctx.beginPath();
-      ctx.arc(t.x, t.y, size, 0, Math.PI * 2);
+      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
       ctx.fill();
+      // Pentagon hint on larger stamps
+      if (r > 3) {
+        ctx.fillStyle = isCurve ? '#2050a0' : isPanenka ? '#906010' : '#808080';
+        ctx.globalAlpha = t.alpha * 0.3;
+        ctx.beginPath();
+        ctx.arc(t.x + r * 0.2, t.y - r * 0.1, r * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     ctx.globalAlpha = 1;
   }
@@ -1665,30 +2019,86 @@
   function drawBallEntity() {
     if (!ball.visible) return;
 
-    // Draw trail behind ball (curve shots)
-    if (ball.inFlight && ball.shotType === 'curve') {
+    // Draw trail behind ball (curve and panenka shots)
+    if (ball.inFlight && (ball.shotType === 'curve' || ball.shotType === 'panenka')) {
       drawBallTrail();
     }
 
-    // Shadow
+    // Shadow — gradient ellipse
     const shadowScale = Math.max(0.3, 1 - ball.z * 0.015);
-    ctx.fillStyle = COLORS.ballShadow;
-    ctx.globalAlpha = 0.35;
+    const shadowRx = ball.radius * 1.3 * shadowScale;
+    const shadowRy = ball.radius * 0.5 * shadowScale;
+    // Use ellipse for shadow with gradient alpha
+    const shadowAlpha = 0.35 * shadowScale;
+    ctx.fillStyle = 'rgba(10,40,10,' + shadowAlpha + ')';
     ctx.beginPath();
-    ctx.ellipse(ball.x, ball.y, ball.radius * shadowScale, ball.radius * shadowScale * 0.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(ball.x, ball.y, shadowRx, shadowRy, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.globalAlpha = 1;
+    // Softer outer ring
+    ctx.fillStyle = 'rgba(10,40,10,' + (shadowAlpha * 0.4) + ')';
+    ctx.beginPath();
+    ctx.ellipse(ball.x, ball.y, shadowRx * 1.3, shadowRy * 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Ball
+    // Ball body
     const visualY = ball.y - ball.z * 2;
+    const R = ball.radius;
+
+    // Dark outline
+    ctx.fillStyle = '#303030';
+    ctx.beginPath();
+    ctx.arc(ball.x, visualY, R + 0.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White base
     ctx.fillStyle = COLORS.ball;
     ctx.beginPath();
-    ctx.arc(ball.x, visualY, ball.radius, 0, Math.PI * 2);
+    ctx.arc(ball.x, visualY, R, 0, Math.PI * 2);
     ctx.fill();
-    // Pattern
-    ctx.fillStyle = '#c0c0c0';
-    ctx.fillRect(ball.x - 0.5, visualY - ball.radius * 0.5, 1, ball.radius);
-    ctx.fillRect(ball.x - ball.radius * 0.5, visualY - 0.5, ball.radius, 1);
+
+    // Pentagon pattern (rotates during flight) — clipped to ball circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(ball.x, visualY, R, 0, Math.PI * 2);
+    ctx.clip();
+
+    const rot = ball.inFlight ? stateTimer * 0.08 : 0;
+    ctx.fillStyle = COLORS.ballPentagon;
+    const pentR = R * 0.38;
+    // Center pentagon
+    drawPentagon(ball.x, visualY, pentR * 0.85, rot);
+    // Surrounding pentagons
+    for (let i = 0; i < 5; i++) {
+      const a = rot + (i * Math.PI * 2) / 5;
+      const px = ball.x + Math.cos(a) * R * 0.58;
+      const py = visualY + Math.sin(a) * R * 0.58;
+      drawPentagon(px, py, pentR * 0.55, a);
+    }
+
+    // Specular highlight (top-left)
+    const hlg = ctx.createRadialGradient(ball.x - R * 0.3, visualY - R * 0.3, 0, ball.x - R * 0.3, visualY - R * 0.3, R * 0.7);
+    hlg.addColorStop(0, 'rgba(255,255,255,0.55)');
+    hlg.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+    hlg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hlg;
+    ctx.beginPath();
+    ctx.arc(ball.x, visualY, R, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore(); // End ball clip
+  }
+
+  function drawPentagon(cx, cy, r, angle) {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = angle + (i * Math.PI * 2) / 5 - Math.PI / 2;
+      const px = cx + Math.cos(a) * r;
+      const py = cy + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
   }
 
   function drawSwipeIndicator() {
@@ -1709,27 +2119,44 @@
     const isCurveGesture = perpDist > CURVE_MIN_PERP_DIST && dist > 40;
     const isPanenkaGesture = dist < PANENKA_MAX_DIST && elapsed > PANENKA_MIN_TIME && Math.abs(angleRatio) < PANENKA_MAX_ANGLE;
 
-    let lineColor = 'rgba(255,255,255,0.5)';
+    let lineColor = 'rgba(255,255,255,0.6)';
+    let glowColor = 'rgba(255,255,255,0.15)';
     let labelText = '';
     if (isCurveGesture) {
-      lineColor = 'rgba(96,160,255,0.7)'; // blue for curve
+      lineColor = 'rgba(96,160,255,0.8)';
+      glowColor = 'rgba(96,160,255,0.2)';
       labelText = 'CURVA!';
     } else if (isPanenkaGesture) {
-      lineColor = 'rgba(232,200,32,0.7)'; // golden for panenka
+      lineColor = 'rgba(232,200,32,0.8)';
+      glowColor = 'rgba(232,200,32,0.2)';
       labelText = 'PANENKA';
     }
 
-    // Draw the swipe path as a line (curved for curve gesture)
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
+    // Glow behind line
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = 6;
+    ctx.setLineDash([]);
     if (isCurveGesture && input.path.length > 2) {
-      // Draw the actual curved path
       ctx.beginPath();
       ctx.moveTo(input.path[0].x, input.path[0].y);
-      for (let i = 1; i < input.path.length; i++) {
-        ctx.lineTo(input.path[i].x, input.path[i].y);
-      }
+      for (let i = 1; i < input.path.length; i++) ctx.lineTo(input.path[i].x, input.path[i].y);
+      ctx.lineTo(input.endX, input.endY);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(input.startX, input.startY);
+      ctx.lineTo(input.endX, input.endY);
+      ctx.stroke();
+    }
+
+    // Main line
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([5, 4]);
+    if (isCurveGesture && input.path.length > 2) {
+      ctx.beginPath();
+      ctx.moveTo(input.path[0].x, input.path[0].y);
+      for (let i = 1; i < input.path.length; i++) ctx.lineTo(input.path[i].x, input.path[i].y);
       ctx.lineTo(input.endX, input.endY);
       ctx.stroke();
     } else {
@@ -1742,45 +2169,77 @@
 
     // Arrow head
     const angle = Math.atan2(dy, dx);
-    ctx.fillStyle = lineColor.replace('0.5', '0.6').replace('0.7', '0.8');
+    ctx.fillStyle = lineColor.replace('0.6', '0.8').replace('0.8', '0.9');
     ctx.beginPath();
     ctx.moveTo(input.endX, input.endY);
-    ctx.lineTo(input.endX - 10 * Math.cos(angle - 0.4), input.endY - 10 * Math.sin(angle - 0.4));
-    ctx.lineTo(input.endX - 10 * Math.cos(angle + 0.4), input.endY - 10 * Math.sin(angle + 0.4));
+    ctx.lineTo(input.endX - 11 * Math.cos(angle - 0.4), input.endY - 11 * Math.sin(angle - 0.4));
+    ctx.lineTo(input.endX - 11 * Math.cos(angle + 0.4), input.endY - 11 * Math.sin(angle + 0.4));
     ctx.closePath();
     ctx.fill();
 
-    // Power bar
-    const barW = 40;
-    const barH = 5;
+    // Power bar — gradient fill
+    const barW = 44;
+    const barH = 6;
     const bx = input.startX - barW / 2;
     const by = input.startY + 15;
-    ctx.fillStyle = '#333';
-    ctx.fillRect(bx, by, barW, barH);
-    ctx.fillStyle = power < 0.4 ? '#40e840' : power < 0.75 ? '#e8e840' : '#e84040';
+    ctx.fillStyle = '#222';
+    ctx.fillRect(bx - 1, by - 1, barW + 2, barH + 2);
+    const pg = ctx.createLinearGradient(bx, by, bx + barW * power, by);
+    if (power < 0.4) {
+      pg.addColorStop(0, '#30c030'); pg.addColorStop(1, '#40e840');
+    } else if (power < 0.75) {
+      pg.addColorStop(0, '#c0c020'); pg.addColorStop(1, '#e8e840');
+    } else {
+      pg.addColorStop(0, '#c03030'); pg.addColorStop(1, '#e84040');
+    }
+    ctx.fillStyle = pg;
     ctx.fillRect(bx, by, barW * power, barH);
 
-    // Shot type label
+    // Shot type label with shadow
     if (labelText) {
       const labelColor = isCurveGesture ? '#60a0ff' : '#e8c820';
-      drawTextCentered(labelText, input.startY + 28, 1.5, labelColor);
+      const lw = measureText(labelText, 1.5);
+      drawTextShadow(labelText, (DESIGN_W - lw) / 2, input.startY + 28, 1.5, labelColor);
     }
   }
 
   function drawScoreboard() {
-    // Background
-    ctx.fillStyle = COLORS.scoreBg;
+    // Background gradient
+    const sbg = ctx.createLinearGradient(0, 0, 0, 55);
+    sbg.addColorStop(0, '#0a0a1a');
+    sbg.addColorStop(0.7, '#101028');
+    sbg.addColorStop(1, '#181830');
+    ctx.fillStyle = sbg;
     ctx.fillRect(0, 0, DESIGN_W, 55);
 
-    // Streak label (left)
-    drawText('STREAK', 12, 6, 1.5, '#a0a0a0');
+    // Gold accent line at bottom
+    const glg = ctx.createLinearGradient(0, 54, DESIGN_W, 54);
+    glg.addColorStop(0, 'rgba(200,160,30,0)');
+    glg.addColorStop(0.3, 'rgba(232,200,32,0.7)');
+    glg.addColorStop(0.5, 'rgba(255,220,60,0.9)');
+    glg.addColorStop(0.7, 'rgba(232,200,32,0.7)');
+    glg.addColorStop(1, 'rgba(200,160,30,0)');
+    ctx.fillStyle = glg;
+    ctx.fillRect(0, 54, DESIGN_W, 1.5);
 
-    // Big streak number (center)
+    // Streak label (left)
+    drawTextShadow('STREAK', 12, 6, 1.5, '#a0a0b0');
+
+    // Big streak number (center) with glow
     const streakStr = '' + game.streak;
-    drawTextCentered(streakStr, 2, 4, '#e8c820');
+    const sw = measureText(streakStr, 4);
+    const sx = (DESIGN_W - sw) / 2;
+    // Glow behind number
+    if (game.streak > 0) {
+      ctx.fillStyle = 'rgba(232,200,32,0.12)';
+      ctx.beginPath();
+      ctx.arc(DESIGN_W / 2, 18, 22, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    drawTextShadow(streakStr, sx, 2, 4, '#e8c820');
 
     // Best label (right)
-    drawText('BEST ' + game.bestStreak, 270, 6, 1.5, '#808080');
+    drawTextShadow('BEST ' + game.bestStreak, 270, 6, 1.5, '#707080');
 
     // Recent results strip (last 10)
     const indicatorY = 45;
@@ -1824,7 +2283,6 @@
     let text, color;
     switch (stateData.result) {
       case 'goal':
-        // Special texts for special shot goals
         if (stateData.shotType === 'curve') {
           text = 'GOLAZO!'; color = '#60ff60';
         } else if (stateData.shotType === 'panenka') {
@@ -1836,36 +2294,61 @@
       case 'save': text = 'SAVED!'; color = COLORS.saveText; break;
       default: text = 'MISS!'; color = COLORS.missText; break;
     }
-    drawTextCentered(text, 300, 5, color);
+
+    // Scale animation: 120% → 100% in first 15 frames
+    const scaleT = Math.min(stateTimer / 15, 1);
+    const scale = 1.2 - 0.2 * scaleT;
+    const ps = 5 * scale;
+
+    // Draw with outline
+    const w = measureText(text, ps);
+    const x = (DESIGN_W - w) / 2;
+    const y = 300;
+    // 8-direction outline
+    const offsets = [[-2,-2],[0,-2],[2,-2],[-2,0],[2,0],[-2,2],[0,2],[2,2]];
+    for (const [ox, oy] of offsets) {
+      drawText(text, x + ox, y + oy, ps, '#000000');
+    }
+    drawText(text, x, y, ps, color);
 
     // Show shot type subtitle for special shots even on miss/save
     if (stateData.shotType === 'curve' && stateData.result !== 'goal') {
-      drawTextCentered('CURVA', 345, 2, '#6090c0');
+      drawTextOutlinedCentered('CURVA', 350, 2, '#6090c0');
     } else if (stateData.shotType === 'panenka' && stateData.result !== 'goal') {
-      drawTextCentered('PANENKA', 345, 2, '#c0a020');
+      drawTextOutlinedCentered('PANENKA', 350, 2, '#c0a020');
     }
   }
 
   function drawParadinhaIndicator() {
     if (gameState !== 'RUNUP' || !paradinhaActive) return;
-    // Blinking "!" above kicker
+    // Blinking "!" above kicker with outline
     if (Math.floor(paradinhaPauseTimer / 4) % 2 === 0) {
-      drawText('!', kicker.x - 3, kicker.y - 58, 3, '#e84040');
+      drawTextOutlined('!', kicker.x - 3, kicker.y - 58, 3, '#e84040');
     }
-    // Pause timer bar showing how much time is left
+    // Pause timer bar with border
     const remaining = 1 - paradinhaPauseTimer / PARADINHA_MAX_PAUSE;
-    const barW = 30;
-    const barH = 3;
+    const barW = 32;
+    const barH = 4;
+    const bx = kicker.x - barW / 2;
+    const by = kicker.y - 48;
+    ctx.fillStyle = '#111';
+    ctx.fillRect(bx - 1, by - 1, barW + 2, barH + 2);
     ctx.fillStyle = '#333';
-    ctx.fillRect(kicker.x - barW / 2, kicker.y - 48, barW, barH);
-    ctx.fillStyle = remaining > 0.4 ? '#e8c820' : '#e84040';
-    ctx.fillRect(kicker.x - barW / 2, kicker.y - 48, barW * remaining, barH);
+    ctx.fillRect(bx, by, barW, barH);
+    const tbg = ctx.createLinearGradient(bx, by, bx + barW * remaining, by);
+    if (remaining > 0.4) {
+      tbg.addColorStop(0, '#c0a020'); tbg.addColorStop(1, '#e8c820');
+    } else {
+      tbg.addColorStop(0, '#c03030'); tbg.addColorStop(1, '#e84040');
+    }
+    ctx.fillStyle = tbg;
+    ctx.fillRect(bx, by, barW * remaining, barH);
   }
 
   function drawReadyPrompt() {
     if (gameState !== 'READY') return;
     if (Math.floor(stateTimer / 25) % 2 === 0) {
-      drawTextCentered('SWIPE TO SHOOT', 570, 2, '#f0f0f0');
+      drawTextOutlinedCentered('SWIPE TO SHOOT', 570, 2, '#f0f0f0');
     }
   }
 
@@ -1876,64 +2359,137 @@
     drawGoalNet();
     drawGoalPosts();
 
-    // Overlay
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    // Gradient overlay (darker top and bottom)
+    const tog = ctx.createLinearGradient(0, 0, 0, DESIGN_H);
+    tog.addColorStop(0, 'rgba(0,0,10,0.75)');
+    tog.addColorStop(0.3, 'rgba(0,0,10,0.55)');
+    tog.addColorStop(0.5, 'rgba(0,0,10,0.45)');
+    tog.addColorStop(0.7, 'rgba(0,0,10,0.55)');
+    tog.addColorStop(1, 'rgba(0,0,10,0.80)');
+    ctx.fillStyle = tog;
     ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
 
-    // Title
-    drawTextCentered('PENALTY', 150, 6, '#f0f0f0');
-    drawTextCentered('KICK', 195, 6, '#e8c820');
+    // Title with outline
+    drawTextOutlinedCentered('PENALTY', 150, 6, '#f0f0f0');
+    drawTextOutlinedCentered('KICK', 195, 6, '#e8c820');
 
-    // Subtitle
-    drawTextCentered('SUPERSTAR', 260, 3, '#40e840');
+    // Subtitle with shadow
+    drawTextShadowCentered('SUPERSTAR EDITION', 260, 2.5, '#40e840');
 
     // High score
     if (game.highScore > 0) {
-      drawTextCentered('BEST: ' + game.highScore, 295, 2.5, '#e8c820');
+      drawTextShadowCentered('BEST: ' + game.highScore, 295, 2.5, '#e8c820');
     }
 
-    // Ball decoration
+    // Ball decoration with pentagon pattern
+    const bcx = GOAL_CENTER_X, bcy = 340, br = 14;
+    // Outline
+    ctx.fillStyle = '#303030';
+    ctx.beginPath();
+    ctx.arc(bcx, bcy, br + 1, 0, Math.PI * 2);
+    ctx.fill();
+    // White base
     ctx.fillStyle = COLORS.ball;
     ctx.beginPath();
-    ctx.arc(GOAL_CENTER_X, 330, 12, 0, Math.PI * 2);
+    ctx.arc(bcx, bcy, br, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#b0b0b0';
-    ctx.fillRect(GOAL_CENTER_X - 1, 322, 2, 16);
-    ctx.fillRect(GOAL_CENTER_X - 8, 329, 16, 2);
+    // Pentagons — clipped to ball
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(bcx, bcy, br, 0, Math.PI * 2);
+    ctx.clip();
+
+    ctx.fillStyle = COLORS.ballPentagon;
+    const titleRot = titleAnimTimer * 0.015;
+    drawPentagon(bcx, bcy, br * 0.35, titleRot);
+    for (let i = 0; i < 5; i++) {
+      const a = titleRot + (i * Math.PI * 2) / 5;
+      const px = bcx + Math.cos(a) * br * 0.55;
+      const py = bcy + Math.sin(a) * br * 0.55;
+      drawPentagon(px, py, br * 0.22, a);
+    }
+    // Highlight
+    const thlg = ctx.createRadialGradient(bcx - br * 0.3, bcy - br * 0.3, 0, bcx - br * 0.3, bcy - br * 0.3, br * 0.8);
+    thlg.addColorStop(0, 'rgba(255,255,255,0.45)');
+    thlg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = thlg;
+    ctx.beginPath();
+    ctx.arc(bcx, bcy, br, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore(); // End ball clip
 
     // Tap to start
     if (Math.floor(titleAnimTimer / 30) % 2 === 0) {
-      drawTextCentered('TAP TO START', 440, 2.5, '#f0f0f0');
+      drawTextOutlinedCentered('TAP TO START', 440, 2.5, '#f0f0f0');
     }
 
     // Credits
-    drawTextCentered('RETRO EDITION', 520, 1.5, '#707070');
+    drawTextShadowCentered('SUPERSTAR EDITION', 520, 1.5, '#606070');
   }
 
   function drawGameOverScreen() {
     if (gameState !== 'GAME_OVER') return;
 
-    ctx.fillStyle = 'rgba(0,0,0,0.82)';
-    ctx.fillRect(0, 80, DESIGN_W, 500);
+    // Panel background with gradient
+    const panelX = 20, panelY = 85, panelW = DESIGN_W - 40, panelH = 470;
+    const pbg = ctx.createLinearGradient(panelX, panelY, panelX, panelY + panelH);
+    pbg.addColorStop(0, 'rgba(5,5,20,0.92)');
+    pbg.addColorStop(0.5, 'rgba(10,10,30,0.90)');
+    pbg.addColorStop(1, 'rgba(5,5,15,0.94)');
+    ctx.fillStyle = pbg;
+    ctx.fillRect(panelX, panelY, panelW, panelH);
+
+    // Gold border
+    ctx.strokeStyle = '#c0a020';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(panelX + 1, panelY + 1, panelW - 2, panelH - 2);
+    // Inner subtle border
+    ctx.strokeStyle = 'rgba(232,200,32,0.25)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(panelX + 4, panelY + 4, panelW - 8, panelH - 8);
 
     // Title
-    drawTextCentered('GAME OVER', 105, 4, '#f0f0f0');
+    drawTextOutlinedCentered('GAME OVER', 105, 4, '#f0f0f0');
 
-    // Big goal number
+    // Big goal number with glow
     const goalsStr = '' + game.totalGoals;
-    drawTextCentered(goalsStr, 160, 8, '#e8c820');
-    drawTextCentered('GOALS', 215, 2.5, '#c0a020');
+    // Glow
+    const gw = measureText(goalsStr, 8);
+    const gx = (DESIGN_W - gw) / 2 + gw / 2;
+    const gy = 180;
+    const glw = ctx.createRadialGradient(gx, gy, 0, gx, gy, 40);
+    glw.addColorStop(0, 'rgba(232,200,32,0.2)');
+    glw.addColorStop(1, 'rgba(232,200,32,0)');
+    ctx.fillStyle = glw;
+    ctx.beginPath();
+    ctx.arc(gx, gy, 40, 0, Math.PI * 2);
+    ctx.fill();
 
-    // New best indicator
-    if (stateData.isNewBest && Math.floor(stateTimer / 12) % 2 === 0) {
-      drawTextCentered('NEW BEST!', 248, 3, '#40e840');
+    drawTextOutlinedCentered(goalsStr, 155, 8, '#e8c820');
+    drawTextShadowCentered('GOALS', 218, 2.5, '#c0a020');
+
+    // New best indicator with sparkle
+    if (stateData.isNewBest) {
+      if (Math.floor(stateTimer / 12) % 2 === 0) {
+        drawTextOutlinedCentered('NEW BEST!', 248, 3, '#40e840');
+      }
+      // Sparkle dots
+      if (Math.floor(stateTimer / 6) % 3 !== 0) {
+        const sparkles = [[100, 252], [260, 248], [130, 262], [230, 256]];
+        ctx.fillStyle = '#e8c820';
+        for (const [sx, sy] of sparkles) {
+          const offset = Math.sin(stateTimer * 0.1 + sx) * 3;
+          ctx.fillRect(sx + offset, sy, 2, 2);
+        }
+      }
     }
 
-    // Stats table
+    // Stats table with alternating rows
     const statsY = 285;
-    const lineH = 22;
+    const lineH = 24;
     const labelX = 60;
-    const valX = 280;
+    const valX = 290;
 
     const stats = [
       ['SHOTS', '' + game.totalShots],
@@ -1946,17 +2502,22 @@
 
     for (let i = 0; i < stats.length; i++) {
       const y = statsY + i * lineH;
-      drawText(stats[i][0], labelX, y, 1.8, '#a0a0a0');
+      // Alternating row background
+      if (i % 2 === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fillRect(panelX + 8, y - 2, panelW - 16, lineH);
+      }
+      drawTextShadow(stats[i][0], labelX, y, 1.8, '#a0a0b0');
       const valW = measureText(stats[i][1], 1.8);
-      drawText(stats[i][1], valX - valW, y, 1.8, '#f0f0f0');
+      drawTextShadow(stats[i][1], valX - valW, y, 1.8, '#f0f0f0');
     }
 
     // Best score
-    drawTextCentered('BEST: ' + game.highScore, 430, 2, '#808080');
+    drawTextShadowCentered('BEST: ' + game.highScore, 440, 2, '#808090');
 
     // Tap to restart
     if (Math.floor(stateTimer / 30) % 2 === 0) {
-      drawTextCentered('TAP TO RESTART', 470, 2, '#f0f0f0');
+      drawTextOutlinedCentered('TAP TO RESTART', 475, 2, '#f0f0f0');
     }
   }
 
@@ -1969,9 +2530,14 @@
     if (gameState === 'TITLE') {
       drawTitleScreen();
     } else {
-      // Flash effect
+      // Flash effect — golden-white radial burst
       if (flashTimer > 0) {
-        ctx.fillStyle = '#fff';
+        const flashAlpha = flashTimer / 8;
+        const fg = ctx.createRadialGradient(GOAL_CENTER_X, GOAL_LINE_Y, 0, GOAL_CENTER_X, GOAL_LINE_Y, DESIGN_W * 0.8);
+        fg.addColorStop(0, 'rgba(255,248,200,' + flashAlpha + ')');
+        fg.addColorStop(0.3, 'rgba(255,230,120,' + (flashAlpha * 0.7) + ')');
+        fg.addColorStop(1, 'rgba(255,255,255,' + (flashAlpha * 0.3) + ')');
+        ctx.fillStyle = fg;
         ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
         endDraw();
         return;
@@ -1984,7 +2550,7 @@
 
       // Draw GK (behind goal posts if not diving far)
       const gkSprite = getGKSprite();
-      const gkPS = 3;
+      const gkPS = 2;
       const gkSpriteW = gkSprite[0].length * gkPS;
       const gkSpriteH = gkSprite.length * gkPS;
       drawSprite(gkSprite, gk.x - gkSpriteW / 2, gk.y - gkSpriteH + 10, gkPS, false);
@@ -1996,7 +2562,7 @@
 
       // Draw kicker
       const kickSprite = getKickerSprite();
-      const kPS = 3;
+      const kPS = 2;
       const kSpriteW = kickSprite[0].length * kPS;
       const kSpriteH = kickSprite.length * kPS;
       drawSprite(kickSprite, kicker.x - kSpriteW / 2, kicker.y - kSpriteH + 5, kPS, false);
@@ -2008,12 +2574,17 @@
       drawResultOverlay();
       drawReadyPrompt();
 
-      // Slow-mo vignette
+      // Slow-mo vignette — stronger + subtle desaturation tint
       if (slowMoActive && gameState === 'BALL_FLIGHT') {
-        const grd = ctx.createRadialGradient(DESIGN_W/2, DESIGN_H/2, DESIGN_W*0.35, DESIGN_W/2, DESIGN_H/2, DESIGN_W*0.7);
+        // Dark vignette
+        const grd = ctx.createRadialGradient(DESIGN_W/2, DESIGN_H/2, DESIGN_W*0.25, DESIGN_W/2, DESIGN_H/2, DESIGN_W*0.65);
         grd.addColorStop(0, 'rgba(0,0,0,0)');
-        grd.addColorStop(1, 'rgba(0,0,0,0.25)');
+        grd.addColorStop(0.6, 'rgba(0,0,10,0.12)');
+        grd.addColorStop(1, 'rgba(0,0,20,0.35)');
         ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
+        // Subtle cool-blue desaturation overlay
+        ctx.fillStyle = 'rgba(20,30,60,0.08)';
         ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
       }
 
